@@ -1,18 +1,15 @@
 from flask import Flask, render_template
 from flask_socketio import SocketIO, join_room, leave_room, emit
-import eventlet
-eventlet.monkey_patch()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
 socketio = SocketIO(app)
 
-# Зберігаємо ігрові дані
 rooms = {}
 
 @app.route('/')
 def index():
-    return "Checkers Server Running"
+    return render_template('main.html')
 
 @socketio.on('join_game')
 def handle_join(data):
