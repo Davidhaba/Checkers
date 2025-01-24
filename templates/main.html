@@ -557,7 +557,7 @@ document.getElementById('cancel-restart').addEventListener('click', function() {
 
 const translationsCkeckers = {
     uk: {
-        settingsTitle: "Налаштування гри",
+        settingsTitle: "Налаштування шашок",
         language: "Мова:",
         gameMode: "Режим гри:",
         singlePlayer: "Один гравець (проти ШІ)",
@@ -588,7 +588,7 @@ const translationsCkeckers = {
         redoMove: "Повернути хід",
     },
     en: {
-        settingsTitle: "Game Settings",
+        settingsTitle: "Checkers Settings",
         language: "Language:",
         gameMode: "Game Mode:",
         singlePlayer: "Single Player (vs AI)",
@@ -640,7 +640,7 @@ function updateLanguageTextsCheckers() {
     document.querySelector("#game-over-text").textContent = texts.gameOverText;
     document.querySelector("#restart-button").textContent = texts.newGame;
     document.querySelector("#restart-button-inMainScreen").textContent = texts.newGame;
-     document.querySelector("#mandatoryCaptureLabel").textContent = texts.mandatoryCapture;
+    document.querySelector("#mandatoryCaptureLabel").textContent = texts.mandatoryCapture;
     document.querySelector("#confirm-restart").textContent = texts.yesRestart;
     document.querySelector("#cancel-restart").textContent = texts.noKeepIt;
     document.querySelector("#warningTextInRestartModal").textContent = texts.warningTextInRestartModal;
