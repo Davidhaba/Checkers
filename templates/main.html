@@ -1,0 +1,1067 @@
+<!-- by David -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Checkers</title>
+  <style>
+    
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body {
+    font-family: Arial, sans-serif;
+    background-color: #e0fbff;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: column;
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+}
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    aspect-ratio: 1 / 1;
+    max-width: 90vmin;
+    max-height: 90vmin;
+    width: 100%;
+    height: 100%;
+    border: 2px solid #333;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    background-color: black;
+    overflow: hidden;
+}
+
+.cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-size: cover;
+    transition: all 0.2s;
+}
+.cell.highlight {
+    border: 3px solid #a3d8ff;
+}
+.cell.highlight-capture {
+    border: 3px solid #ff6b6b;
+}
+.cell.light {
+    background-color: #d8b88a;
+}
+.cell.dark {
+    background-color: #7f4f2a;
+}
+.cell.highlight-last-move-from {
+    background-color: rgba(255, 255, 0, 0.5);
+}
+.cell.highlight-last-move-to {
+    background-color: rgba(0, 255, 0, 0.5);
+}
+
+.checker {
+    width: 70%;
+    height: 70%;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.checker.white {
+    background-color: #fff;
+    border: 3px solid #b5b5b5;
+}
+.checker.black {
+    background-color: #333;
+    border: 3px solid #000;
+}
+.checker.king {
+    border-color: gold;
+    box-shadow: 0 0 10px 4px gold;
+    animation: king-glow 2s infinite alternate;
+}
+.checker.selected {
+    border-color: #00ff00;
+}
+.checker.white:active,
+.checker.black:active {
+    transform: scale(0.9);
+}
+
+@keyframes king-glow {
+    from {
+        box-shadow: 0 0 10px 1px gold;
+    }
+}
+
+@media (max-width: 600px) {
+    .board {
+        grid-template-columns: repeat(8, 1fr);
+        grid-template-rows: repeat(8, 1fr);
+    }
+    .checker {
+        width: 60%;
+        height: 60%;
+    }
+}
+
+#game-info {
+    text-align: center;
+    border-radius: 10px;
+    background-color: rgba(0,0,0,0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    pointer-events: none;
+    display: flex;
+    flex-direction: row;
+    gap: 10px; padding: 10px;
+    border: 2px solid black;
+    overflow: hidden;
+    box-sizing: border-box;
+    max-width: 100%;
+    overflow: hidden;
+    margin: 20px 0;
+    max-width: 100%;
+}
+.game-info {
+    background-color: rgba(250, 250, 250, 0.5);
+    border-radius: 10px;
+    padding: 10px;
+    border: 1px solid white;
+    max-width: unset;
+    flex: 1;
+    min-width: 0;
+    max-width: 100%;
+    text-align: center;
+}
+
+.boldText {
+    font-size: 20px;
+    margin-bottom: 10px;
+    color: #333;
+    font-weight: bold;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.smallText {
+    font-size: 18px;
+    color: #666;
+}
+
+#restart-button-inMainScreen, #aiMove {
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  font-size: 16px;
+  display: inline-block;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+#aiMove {
+    margin: 20px 5px 10px;
+    background-color: #4CAF50;
+}
+#aiMove:hover {
+  background-color: #45a049;
+}
+#restart-button-inMainScreen:hover {
+  background-color: #c70000;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    transition: all 0.2s;
+}
+.hidden {
+    display: none;
+}
+.modal-content {
+    background-color: #f9f9f9;
+    padding: 30px 20px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+    max-width: 400px;
+    width: 90%;
+    transition: all 0.2s;
+    transform: scale(0);
+}
+.modal-content h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #333;
+    font-weight: bold;
+}
+.modal-content label {
+    display: block;
+    margin-bottom: 15px;
+    font-size: 16px;
+    color: #555;
+    text-align: left;
+    margin: 15px 0 0;
+}
+.modal-content select {
+    width: 100%;
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: border-color 0.2s ease;
+}
+.modal-content select:focus {
+    border-color: #00aaff;
+}
+.modal-content button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #00aaff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.modal-content button:hover {
+    background-color: #0077cc;
+}
+.modal-content button:active {
+    background-color: #005fa3;
+}
+.modal-content button:focus {
+    box-shadow: 0 0 5px 2px rgba(0, 170, 255, 0.5);
+}
+.modal-content .title-text {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+#mandatoryCaptureDiv {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin: 10px 0;
+}
+#mandatoryCaptureLabel {
+    margin: 0;
+}
+#mandatoryCapture {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 50px;
+    height: 25px;
+    background-color: #ccc;
+    border-radius: 15px;
+    position: relative;
+    outline: none;
+    cursor: pointer;
+    margin-left: 10px;
+    transition: all 0.3s ease;
+}
+#mandatoryCapture::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 21px;
+    height: 21px;
+    background-color: white;
+    border-radius: 50%;
+    transform: scale(0.7);
+    transition: all 0.3s ease;
+}
+#mandatoryCapture:checked {
+    background-color: #4caf50;
+}
+#mandatoryCapture:checked::before {
+    transform: scale(1) translateX(25px);
+}
+
+.game-controls {
+    display: flex;
+    justify-content: center;
+    margin: 10px 0;
+    flex-direction: column;
+    gap: 5px;
+}
+.game-controls button {
+    padding: 7px 10px;
+    font-size: 14px;
+    cursor: pointer;
+    pointer-events: all;
+    background-color: rgba(115, 192, 255, 0.2);
+    border: 1px solid white;
+    border-radius: 5px;
+    transition: all 0.2s;
+}
+.game-controls button:active:not(:disabled) {
+    transform: scale(0.9);
+}
+.game-controls button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+  </style>
+</head>
+<body>
+    <div id="game-info">
+        <div class="game-info">
+            <div class="boldText" id="status">Status</div>
+            <div class="smallText" id="current-player">Loading...</div>
+        </div>
+        <div class="game-info">
+            <div class="boldText" id="scoreboard">Score Board</div>
+            <div class="smallText" id="white-score"><label>White: </label><span>0</span></div>
+            <div class="smallText" id="black-score"><label>Black: </label><span>0</span></div>
+        </div>
+        <div class="game-info">
+            <div class="game-controls">
+                <button id="undo-move">Undo Move</button>
+                <button id="redo-move" disabled>Redo Move</button>
+            </div>
+        </div>
+    </div>
+    <div class="board"></div>
+    <button id="aiMove">AI Move</button>
+    <button id="restart-button-inMainScreen">New Game</button>
+<div id="confirmation-modal" class="modal hidden">
+  <div class="modal-content">
+    <h2>Warning!</h2>
+    <p id="warningTextInRestartModal">Are you sure you want to restart the game?</p>
+    <button id="confirm-restart">Yes, restart</button>
+    <button id="cancel-restart">No, keep it</button>
+  </div>
+</div>
+
+<div id="game-status-modal" class="modal hidden">
+    <div class="modal-content">
+        <div class="title-text" id="game-over-text"></div>
+        <div id="status-text"></div>
+        <button id="restart-button">New game</button>
+    </div>
+</div>
+
+<div id="settings-modal" class="modal hidden">
+    <div class="modal-content">
+        <h2>Game Settings</h2>
+        <form id="game-settings">
+            <label for="language-selector">Language:</label>
+            <select name="language" id="language-selector">
+                <option value="en">English</option>
+                <option value="uk">Українська</option>
+            </select>
+            <label for="gameMode">Game Mode:</label>
+            <select name="gameMode" id="gameMode">
+                <option value="two">Two Players</option>
+                <option value="single">Single Player (vs AI)</option>
+            </select>
+            <label for="startingPlayer">Starting Player:</label>
+            <select name="startingPlayer" id="startingPlayer">
+                <option value="white">White</option>
+                <option value="black">Black</option>
+            </select>
+            <div id="mandatoryCaptureDiv">
+              <label for="mandatoryCapture" id="mandatoryCaptureLabel">Mandatory Capture:</label>
+              <input type="checkbox" id="mandatoryCapture"/>
+            </div>
+            <button type="submit">Start Game</button>
+        </form>
+    </div>
+</div>
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script>
+  function makeAIMove() {
+    const currentCheckers = document.querySelectorAll(`.checker.${currentPlayer}`);
+    if (!currentCheckers.length > 0) return;
+
+    if (allowTouchChange || !selectedChecker) {
+        checker = getRandomChecker(currentCheckers);
+        if (checker) selectedChecker = checker;
+    }
+    if (selectedChecker) {
+        const moves = getAvailableMoves(selectedChecker);
+        availableMoves = moves.availableMoves || [];
+        captureMoves = moves.captureMoves || [];
+    }
+    if (!mandatoryCapture || (captureMoves && captureMoves.length === 0)) {
+        if (selectedChecker && ((captureMoves && captureMoves.length > 0) || (availableMoves && availableMoves.length > 0))) {
+            const targetCell = (captureMoves && captureMoves.length > 0)
+                ? captureMoves[Math.floor(Math.random() * captureMoves.length)]
+                : availableMoves[Math.floor(Math.random() * availableMoves.length)];
+
+            if (targetCell) performMove(targetCell);
+        }
+    } else {
+        if (captureMoves && captureMoves.length > 0) {
+            const targetCell = captureMoves[Math.floor(Math.random() * captureMoves.length)];
+            if (targetCell) performMove(targetCell);
+        }
+    }
+}
+function getRandomChecker(checkers) {
+    const allCheckers = Array.from(checkers);
+    let candidateChecker = null;
+    while (allCheckers.length > 0) {
+        const checker = allCheckers.splice(Math.floor(Math.random() * allCheckers.length), 1)[0];
+        if (checker) {
+            const moves = getAvailableMoves(checker);
+            const availableMoves = moves.availableMoves || [];
+            const captureMoves = moves.captureMoves || [];
+            if (mandatoryCapture && captureMoves.length > 0) {
+                return checker;
+            }
+            if (availableMoves.length > 0 || captureMoves.length > 0) {
+                candidateChecker = checker;
+            }
+        }
+    }
+    return candidateChecker;
+}
+
+function checkAiTurn() {
+    if (gameSettings.gameMode === 'single' && currentPlayer === 'black') {
+        setTimeout(makeAIMove, 500);
+    }
+}
+</script>
+<script>
+const board = document.querySelector('.board');
+let selectedChecker = null;
+let gameSettings = { gameMode: 'two', startingPlayer: 'white' };
+let currentPlayer = gameSettings.startingPlayer;
+let allowTouchChange = true;
+let mandatoryCapture;
+let moveHistory = [];
+let historyIndex = -1;
+
+function createBoard() {
+    for (let i = 0; i < 8; i++) {
+        for (let j = 0; j < 8; j++) {
+            const cell = document.createElement('div');
+            cell.classList.add('cell');
+            if ((i + j) % 2 === 0) {
+                cell.classList.add('light');
+            } else {
+                cell.classList.add('dark');
+            }
+            board.appendChild(cell);
+            if (cell.classList.contains('dark') && (i < 3 || i > 4)) {
+                const checker = document.createElement('div');
+                checker.classList.add('checker');
+                cell.appendChild(checker);
+                if (i < 3) {
+                    checker.classList.add('black');
+                } else {
+                    checker.classList.add('white');
+                }
+            }
+        }
+    }
+}
+
+function handleClick(event) {
+    if (gameSettings.gameMode === 'single' && currentPlayer === 'black') return;
+    const mandatoryCapture = document.getElementById('mandatoryCapture').checked;
+    const clickedCell = event.target;
+    if (clickedCell.classList.contains('checker') && allowTouchChange) {
+        clearAllLights();
+        if (clickedCell.classList.contains(currentPlayer)) {
+        selectedChecker = clickedCell;
+        selectedChecker.classList.add('selected');
+        const { availableMoves, captureMoves } = getAvailableMoves(selectedChecker);
+        if (mandatoryCapture && hasMandatoryCaptures()) {
+            highlightMoves([], captureMoves);
+        } else {
+            highlightMoves(availableMoves, captureMoves);
+        }
+        }
+    } else if (clickedCell.classList.contains('cell') && selectedChecker && (clickedCell.classList.contains('highlight') || clickedCell.classList.contains('highlight-capture'))) {
+        performMove(clickedCell);
+    }
+}
+function hasMandatoryCaptures() {
+    const currentCheckers = document.querySelectorAll(`.checker.${currentPlayer}`);
+    for (let checker of currentCheckers) {
+        const { captureMoves } = getAvailableMoves(checker);
+        if (captureMoves.length > 0) {
+            return true;
+        }
+    }
+    return false;
+}
+function getAvailableMoves(selectedChecker) {
+    const checkerCell = selectedChecker.parentElement;
+    const boardCells = Array.from(board.children);
+    const startIndex = boardCells.indexOf(checkerCell);
+    const directions = selectedChecker.classList.contains('white') ? [-9, -7] : [7, 9];
+    const captureDirections = [-18, -14, 14, 18];
+    const availableMoves = [];
+    const captureMoves = [];
+
+    if (selectedChecker.classList.contains('king')) {
+        const kingDirections = [-9, -7, 9, 7];
+        kingDirections.forEach(direction => {
+            let currentIndex = startIndex + direction;
+            let canCapture = false;
+            while (currentIndex >= 0 && currentIndex < 64) {
+                const targetCell = boardCells[currentIndex];
+                if (!targetCell.classList.contains('dark')) break;
+
+                if (targetCell.firstChild) {
+                    if (
+                        !canCapture &&
+                        targetCell.firstChild.classList.contains(
+                            selectedChecker.classList.contains('white') ? 'black' : 'white'
+                        )
+                    ) {
+                        canCapture = true;
+                    } else {
+                        break;
+                    }
+                } else if (canCapture) {
+                    captureMoves.push(targetCell);
+                } else {
+                    availableMoves.push(targetCell);
+                }
+
+                currentIndex += direction;
+            }
+        });
+    } else {
+        directions.forEach(direction => {
+            const targetIndex = startIndex + direction;
+            if (targetIndex >= 0 && targetIndex < 64) {
+                const targetCell = boardCells[targetIndex];
+                if (!targetCell.firstChild && targetCell.classList.contains('dark')) {
+                    availableMoves.push(targetCell);
+                }
+            }
+        });
+
+        captureDirections.forEach(direction => {
+            const targetIndex = startIndex + direction;
+            const middleIndex = startIndex + direction / 2;
+
+            if (targetIndex >= 0 && targetIndex < 64) {
+                const targetCell = boardCells[targetIndex];
+                const middleCell = boardCells[middleIndex];
+
+                if (
+                    targetCell.classList.contains('dark') &&
+                    !targetCell.firstChild &&
+                    middleCell.firstChild &&
+                    middleCell.firstChild.classList.contains(
+                        selectedChecker.classList.contains('white') ? 'black' : 'white'
+                    )
+                ) {
+                    captureMoves.push(targetCell);
+                }
+            }
+        });
+    }
+
+    return { availableMoves, captureMoves };
+}
+
+let socket;
+let roomId;
+function connectToServer() {
+    socket = io('http://localhost:5000');
+    roomId = prompt('Enter room ID to join:');
+    socket.emit('join_game', { room: roomId });
+    socket.on('player_joined', (data) => {
+        console.log(`Players in room: ${data.players}`);
+        if (data.players === 2) {
+            startNewGame();
+            alert('Both players connected. Game starts!');
+        }
+    });
+
+    socket.on('update_board', (data) => {
+        updateBoardFromServer(data.state);
+    });
+}
+function sendMoveToServer(state) {
+    socket.emit('move', { room: roomId, state });
+}
+function updateBoardFromServer(state) {
+    board.innerHTML = state.boardHTML;
+    currentPlayer = state.currentPlayer;
+    updateScore();
+    updateTurnText();
+}
+document.getElementById('gameMode').addEventListener('change', (event) => {
+    if (event.target.value === 'online') {
+        connectToServer();
+    }
+});
+
+function performMove(targetCell) {
+    const checkerCell = selectedChecker.parentElement;
+    const boardCells = Array.from(board.children);
+    const startIndex = boardCells.indexOf(checkerCell);
+    const targetIndex = boardCells.indexOf(targetCell);
+    const rowDifference = Math.abs(Math.floor(startIndex / 8) - Math.floor(targetIndex / 8));
+    const colDifference = Math.abs((startIndex % 8) - (targetIndex % 8));
+    let wasCapture = false;
+    let capturedChecker = null;
+    let capturedPosition = null;
+
+    if (selectedChecker.classList.contains('king')) {
+        const direction = (targetIndex - startIndex) / Math.max(rowDifference, colDifference);
+        let currentIndex = startIndex + direction;
+
+        while (currentIndex !== targetIndex) {
+            var middleCell = boardCells[currentIndex];
+            if (middleCell.firstChild && middleCell.firstChild !== selectedChecker) {
+                capturedChecker = middleCell.firstChild;
+                capturedPosition = middleCell;
+                middleCell.removeChild(middleCell.firstChild);
+                wasCapture = true;
+                break;
+            }
+            currentIndex += direction;
+        }
+    } else {
+        if (rowDifference === 2 && colDifference === 2) {
+            const middleIndex = (startIndex + targetIndex) / 2;
+            var middleCell = boardCells[middleIndex];
+            if (middleCell.firstChild) {
+                capturedChecker = middleCell.firstChild;
+                capturedPosition = middleCell;
+                middleCell.removeChild(middleCell.firstChild);
+                wasCapture = true;
+            }
+        }
+    }
+    targetCell.appendChild(selectedChecker);
+    highlightLastMove({ from: checkerCell, to: targetCell });
+    const previusPlayer = currentPlayer;
+    const previusAllowTouchChange = allowTouchChange;
+    const previusIsKing = selectedChecker.classList.contains('king');
+    const targetRow = Math.floor(targetIndex / 8);
+    if (
+        (selectedChecker.classList.contains('white') && targetRow === 0) ||
+        (selectedChecker.classList.contains('black') && targetRow === 7)
+    ) {
+        selectedChecker.classList.add('king');
+    }
+    updateScore();
+    const state = {
+        boardHTML: board.innerHTML,
+        currentPlayer: currentPlayer
+    };
+    sendMoveToServer(state);
+    if (wasCapture && mandatoryCapture) {
+        const { availableMoves, captureMoves } = getAvailableMoves(selectedChecker);
+        if (captureMoves.length > 0) {
+            clearHighlights();
+            highlightMoves(null, captureMoves);
+            allowTouchChange = false;
+            addTurnToHistory({ checkerCell, targetCell, capturedChecker, capturedPosition, wasCapture, boardCells, targetIndex, startIndex, previusPlayer, previusIsKing, previusAllowTouchChange });
+            checkAiTurn();
+            return;
+        }
+    }
+    switchPlayer();
+    allowTouchChange = true;
+    addTurnToHistory({ checkerCell, targetCell, capturedChecker, capturedPosition, wasCapture, boardCells, targetIndex, startIndex, previusPlayer, previusIsKing, previusAllowTouchChange });
+    clearAllLights();
+}
+function addTurnToHistory(data) {
+    const { checkerCell, targetCell, capturedChecker, capturedPosition, wasCapture, boardCells, targetIndex, startIndex, previusPlayer, previusIsKing, previusAllowTouchChange } = data;
+
+    const newMove = {
+        checker: selectedChecker,
+        from: checkerCell,
+        to: targetCell,
+        captured: wasCapture ? capturedChecker : null,
+        capturedPosition: wasCapture ? capturedPosition : null,
+        isKing: selectedChecker.classList.contains('king'),
+        currentPlayer: currentPlayer,
+        allowTouchChange: allowTouchChange,
+        previusPlayer: previusPlayer,
+        previusIsKing: previusIsKing,
+        previusAllowTouchChange: previusAllowTouchChange,
+    };
+
+    if (historyIndex < moveHistory.length - 1) {
+        moveHistory = moveHistory.slice(0, historyIndex + 1);
+    }
+
+    moveHistory.push(newMove);
+    historyIndex++;
+    document.getElementById('undo-move').disabled = false;
+    document.getElementById('redo-move').disabled = true;
+}
+
+function highlightLastMove(lastMove) {
+    const lastMoves = document.querySelectorAll('.highlight-last-move-from, .highlight-last-move-to');
+    if (lastMoves) lastMoves.forEach(move => {
+        move.classList.remove('highlight-last-move-from', 'highlight-last-move-to');
+    });
+    if (lastMove.from && lastMove.to) {
+        lastMove.from.classList.add('highlight-last-move-from');
+        lastMove.to.classList.add('highlight-last-move-to');
+    }
+}
+
+function updateGameStatus(status) {
+    document.getElementById('current-player').textContent = status;
+}
+function showGameStatusModal(status) {
+    showModal("#game-status-modal");
+    document.getElementById('status-text').textContent = status;
+}
+function showSettingsModal() {
+    hideModal("#game-status-modal");
+    showModal("#settings-modal");
+    updateGameStatus("Waiting for settings...");
+}
+
+function showModal(mainModal) {
+    const modal = document.querySelector(mainModal);
+    if (modal) {
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        modal.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+        document.querySelector(mainModal + ">.modal-content").style.transform = "scale(1)";
+    }, 150);
+    }
+}
+function hideModal(mainModal) {
+    const modal = document.querySelector(mainModal);
+    if (modal) {
+    document.querySelector(mainModal + ">.modal-content").style.transform = "scale(0)";
+    modal.style.backgroundColor = "transparent";
+    setTimeout(() => {
+        modal.classList.add("hidden");
+    }, 200);
+    }
+}
+
+document.querySelectorAll('.modal').forEach((modal) => {
+    if (modal.id === 'settings-modal') return;
+    modal.addEventListener('click', () => {
+        hideModal(`#${modal.id}`);
+    });
+    const content = modal.querySelector('.modal-content');
+    if (content) {
+        content.addEventListener('click', (event) => {
+            event.stopPropagation();
+        });
+    }
+});
+
+function startNewGame() {
+    board.innerHTML = '';
+    currentPlayer = gameSettings.startingPlayer;
+    createBoard();
+    moveHistory = [];
+    historyIndex = -1;
+    document.getElementById('undo-move').disabled = true;
+    document.getElementById('redo-move').disabled = true;
+    updateScore();
+    updateGameStatus(`${translationsCkeckers[currLangCheckers].statusTextFirstTurn} ${translationsCkeckers[currLangCheckers][currentPlayer]}`);
+    checkAiTurn();
+}
+
+function handleGameSettings(event) {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    gameSettings.gameMode = formData.get('gameMode');
+    gameSettings.startingPlayer = formData.get('startingPlayer');
+    mandatoryCapture = document.getElementById('mandatoryCapture').checked;
+    hideModal("#settings-modal");
+    startNewGame();
+}
+
+document.querySelector("#language-selector").addEventListener("change", (event) => {
+    currLangCheckers = event.target.value;
+    updateLanguageTextsCheckers();
+});
+document.getElementById('restart-button').addEventListener('click', showSettingsModal);
+document.getElementById('aiMove').addEventListener('click', makeAIMove);
+document.getElementById('game-settings').addEventListener('submit', handleGameSettings);
+
+function checkGameOver() {
+    const whiteCheckers = document.querySelectorAll('.checker.white');
+    const blackCheckers = document.querySelectorAll('.checker.black');
+    let statusText;
+    const texts = translationsCkeckers[currLangCheckers];
+    if (whiteCheckers.length === 0 && blackCheckers.length === 0) {
+        statusText = texts.draw;
+    } else if (whiteCheckers.length === 0) {
+        statusText = texts.theBlackPiecesWon;
+    } else if (blackCheckers.length === 0) {
+        statusText = texts.theWhitePiecesWon;
+    }
+    if (statusText) {
+        updateGameStatus(statusText);
+        showGameStatusModal(statusText);
+    } else {
+        const moveStatus = checkAvailableMoves();
+        if (moveStatus) {
+            updateGameStatus(texts[moveStatus]);
+            showGameStatusModal(texts[moveStatus]);
+        } else {
+            updateTurnText();
+        }
+    }
+}
+
+function checkAvailableMoves() {
+    let noMovesBlack = false;
+    let noMovesWhite = false;
+    if (noAvailableMoves('white')) noMovesWhite = true;
+    if (noAvailableMoves('black')) noMovesBlack = true;
+    if (noMovesWhite && noMovesBlack) {
+        return "draw";
+    } else if (noMovesWhite && currentPlayer === 'white') {
+        return "theBlackPiecesWon";
+    } else if (noMovesBlack && currentPlayer === 'black') {
+        return "theWhitePiecesWon";
+    }
+    return false;
+}
+
+function noAvailableMoves(player) {
+    const currentCheckers = document.querySelectorAll(`.checker.${player}`);
+    for (let checker of currentCheckers) {
+        const { availableMoves, captureMoves } = getAvailableMoves(checker);
+        if (availableMoves.length > 0 || captureMoves.length > 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function highlightMoves(availableMoves, captureMoves) {
+    if (availableMoves) availableMoves.forEach(cell => cell.classList.add('highlight'));
+    if (captureMoves) captureMoves.forEach(cell => cell.classList.add('highlight-capture'));
+}
+
+function clearHighlights() {
+    const highlightedCells = document.querySelectorAll('.highlight, .highlight-capture');
+    if (highlightedCells) highlightedCells.forEach(cell => {
+        cell.classList.remove('highlight', 'highlight-capture');
+    });
+}
+function clearSelectedChecker() {
+    const selected = document.querySelector('.checker.selected');
+    if (selected) {
+        selected.classList.remove('selected');
+    }
+}
+
+function switchPlayer() {
+    currentPlayer = currentPlayer === 'white' ? 'black' : 'white';
+    checkAiTurn();
+    checkGameOver();
+}
+
+function clearAllLights() {
+    clearHighlights();
+    clearSelectedChecker();
+    selectedChecker = null;
+}
+
+function updateTurnText() {
+    updateGameStatus(`${translationsCkeckers[currLangCheckers].statusTextTurn} ${translationsCkeckers[currLangCheckers][currentPlayer]}`);
+}
+
+function undoMove() {
+    if (historyIndex < 0) return;
+    const lastMove = moveHistory[historyIndex];
+    highlightLastMove({ from: lastMove.from, to: lastMove.to });
+    if (lastMove.captured) {
+        lastMove.capturedPosition.appendChild(lastMove.captured);
+    }
+    lastMove.from.appendChild(lastMove.checker);
+    if (!lastMove.previusIsKing && lastMove.checker.classList.contains('king')) {
+        lastMove.checker.classList.remove('king');
+    }
+    historyIndex--;
+    currentPlayer = lastMove.previusPlayer;
+    allowTouchChange = lastMove.previusAllowTouchChange;
+    undoRedoMove(lastMove);
+}
+function redoMove() {
+    if (historyIndex >= moveHistory.length - 1) return;
+    historyIndex++;
+    const nextMove = moveHistory[historyIndex];
+    highlightLastMove({ from: nextMove.from, to: nextMove.to });
+    nextMove.to.appendChild(nextMove.checker);
+    if (nextMove.captured) {
+        nextMove.capturedPosition.removeChild(nextMove.captured);
+    }
+    if (nextMove.isKing && !nextMove.checker.classList.contains('king')) {
+        nextMove.checker.classList.add('king');
+    }
+    currentPlayer = nextMove.currentPlayer;
+    allowTouchChange = nextMove.allowTouchChange;
+    undoRedoMove(nextMove);
+}
+function undoRedoMove(move) {
+    if (!allowTouchChange) {
+        clearHighlights();
+        selectedChecker = move.checker;
+        const { availableMoves, captureMoves } = getAvailableMoves(move.checker);
+        highlightMoves(null, captureMoves);
+    } else {
+        clearAllLights();
+    }
+    updateTurnText();
+    updateScore();
+    document.getElementById('redo-move').disabled = historyIndex === moveHistory.length - 1;
+    document.getElementById('undo-move').disabled = historyIndex < 0;
+}
+
+document.getElementById('undo-move').addEventListener('click', undoMove);
+document.getElementById('redo-move').addEventListener('click', redoMove);
+
+function updateScore() {
+    const whiteCheckers = document.querySelectorAll('.checker.white').length;
+    const blackCheckers = document.querySelectorAll('.checker.black').length;
+
+    document.querySelector('#white-score span').textContent = whiteCheckers;
+    document.querySelector('#black-score span').textContent = blackCheckers;
+}
+
+board.addEventListener('click', handleClick);
+document.addEventListener(() => 'DOMContentLoaded', showSettingsModal());
+
+document.getElementById('restart-button-inMainScreen').addEventListener('click', function() {
+   showModal("#confirmation-modal");
+});
+document.getElementById('confirm-restart').addEventListener('click', function() {
+  hideModal("#confirmation-modal");
+  showSettingsModal();
+});
+document.getElementById('cancel-restart').addEventListener('click', function() {
+  hideModal("#confirmation-modal");
+});
+
+const translationsCkeckers = {
+    uk: {
+        settingsTitle: "Налаштування гри",
+        language: "Мова:",
+        gameMode: "Режим гри:",
+        singlePlayer: "Один гравець (проти ШІ)",
+        twoPlayers: "Двоє гравців",
+        startingPlayer: "Починають:",
+        white: "Білі",
+        black: "Чорні",
+        startGame: "Почати гру",
+        statusText: "Статус",
+        scoreboard: "Табло результатів",
+        statusTextTurn: "Хід:",
+        statusTextFirstTurn: "Перший хід:",
+        whiteWin: "Перемогли Білі!",
+        blackWin: "Перемогли Чорні!",
+        draw: "Нічия!",
+        gameOverText: "Непогано!",
+        newGame: "Нова гра",
+        selectOptions: "Оберіть параметри...",
+        draw: "Нічия!",
+        theBlackPiecesWon: "Перемогли чорні фігури!",
+        theWhitePiecesWon: "Перемогли білі фігури!",
+        mandatoryCapture: "Обов'язковий бій:",
+        warningTextInRestartModal: "Ви впевнені, що хочете перезапустити гру?",
+        warningText: "Увага!",
+        yesRestart: "Так, перезапустити",
+        noKeepIt: "Ні, залишити",
+        undoMove: "Скасувати хід",
+        redoMove: "Повернути хід",
+    },
+    en: {
+        settingsTitle: "Game Settings",
+        language: "Language:",
+        gameMode: "Game Mode:",
+        singlePlayer: "Single Player (vs AI)",
+        twoPlayers: "Two Players",
+        startingPlayer: "Starting Player:",
+        white: "White",
+        black: "Black",
+        startGame: "Start Game",
+        statusText: "Status",
+        scoreboard: "Score Board",
+        statusTextTurn: "Turn:",
+        statusTextFirstTurn: "First turn:",
+        whiteWin: "White Wins!",
+        blackWin: "Black Wins!",
+        draw: "Draw!",
+        gameOverText: "Not bad!",
+        newGame: "New Game",
+        selectOptions: "Select options...",
+        draw: "Draw!",
+        theBlackPiecesWon: "The black pieces won!",
+        theWhitePiecesWon: "The white pieces won!",
+        mandatoryCapture: "Mandatory Capture:",
+        warningTextInRestartModal: "Are you sure you want to restart the game?",
+        warningText: "Warning!",
+        yesRestart: "Yes, restart",
+        noKeepIt: "No, keep it",
+        undoMove: "Undo Move",
+        redoMove: "Redo Move",
+    },
+};
+let currLangCheckers = "en";
+function updateLanguageTextsCheckers() {
+    const texts = translationsCkeckers[currLangCheckers];
+    document.querySelector("#settings-modal h2").textContent = texts.settingsTitle;
+    document.querySelector('label[for="language-selector"]').textContent = texts.language;
+    document.querySelector('label[for="gameMode"]').textContent = texts.gameMode;
+    document.querySelector('label[for="startingPlayer"]').textContent = texts.startingPlayer;
+    const gameModeSelect = document.querySelector('select[name="gameMode"]');
+    gameModeSelect.options[0].text = texts.twoPlayers;
+    gameModeSelect.options[1].text = texts.singlePlayer;
+    const startingPlayerSelect = document.querySelector('select[name="startingPlayer"]');
+    startingPlayerSelect.options[0].text = texts.white;
+    startingPlayerSelect.options[1].text = texts.black;
+    document.querySelector("#game-settings button").textContent = texts.startGame;
+    document.querySelector("#status").textContent = texts.statusText;
+    document.querySelector("#scoreboard").textContent = texts.scoreboard;
+    document.querySelector('#white-score label').textContent = texts.white+": ";
+    document.querySelector('#black-score label').textContent = texts.black+": ";
+    document.querySelector("#game-over-text").textContent = texts.gameOverText;
+    document.querySelector("#restart-button").textContent = texts.newGame;
+    document.querySelector("#restart-button-inMainScreen").textContent = texts.newGame;
+     document.querySelector("#mandatoryCaptureLabel").textContent = texts.mandatoryCapture;
+    document.querySelector("#confirm-restart").textContent = texts.yesRestart;
+    document.querySelector("#cancel-restart").textContent = texts.noKeepIt;
+    document.querySelector("#warningTextInRestartModal").textContent = texts.warningTextInRestartModal;
+    document.querySelector("#confirmation-modal h2").textContent = texts.warningText;
+    document.getElementById("undo-move").textContent = texts.undoMove;
+    document.getElementById("redo-move").textContent = texts.redoMove;
+}
+updateLanguageTextsCheckers();
+
+    </script>
+</body>
+</html>
