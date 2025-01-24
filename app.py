@@ -1,42 +1,40 @@
-import asyncio
-import websockets
-import json
+from flask import Flask, render_template
+from flask_socketio import SocketIO, join_room, leave_room, emit
 
-clients = {}
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'your_secret_key'
+socketio = SocketIO(app)
 
-async def handler(websocket):
-    try:
-        while True:
-            message = await websocket.recv()
-            data = json.loads(message)
+# Зберігаємо ігрові дані
+rooms = {}
 
-            # Обробка підключення гравця
-            if data['type'] == 'join':
-                room = data['room']
-                if room not in clients:
-                    clients[room] = []
-                clients[room].append(websocket)
+@app.route('/')
+def index():
+    return "Checkers Server Running"
 
-                # Якщо у кімнаті вже 2 гравці, сповістити про початок гри
-                if len(clients[room]) == 2:
-                    for client in clients[room]:
-                        await client.send(json.dumps({"type": "start", "player": "white" if clients[room][0] == client else "black"}))
+@socketio.on('join_game')
+def handle_join(data):
+    room = data['room']
+    join_room(room)
+    if room not in rooms:
+        rooms[room] = {'players': 0, 'state': None}
+    rooms[room]['players'] += 1
+    emit('player_joined', {'players': rooms[room]['players']}, room=room)
 
-            # Обробка ходу гравця
-            elif data['type'] == 'move':
-                room = data['room']
-                for client in clients[room]:
-                    if client != websocket:
-                        await client.send(json.dumps({"type": "move", "move": data['move']}))
+@socketio.on('leave_game')
+def handle_leave(data):
+    room = data['room']
+    leave_room(room)
+    if room in rooms:
+        rooms[room]['players'] -= 1
+        if rooms[room]['players'] == 0:
+            del rooms[room]
 
-    except websockets.exceptions.ConnectionClosed:
-        for room, client_list in clients.items():
-            if websocket in client_list:
-                client_list.remove(websocket)
-                break
+@socketio.on('move')
+def handle_move(data):
+    room = data['room']
+    rooms[room]['state'] = data['state']
+    emit('update_board', data, room=room)
 
-async def main():
-    async with websockets.serve(handler, "localhost", 8765):
-        await asyncio.Future()  # Зупинка сервера
-
-asyncio.run(main())
+if __name__ == '__main__':
+    socketio.run(app, debug=True)
