@@ -573,10 +573,10 @@ document.addEventListener('DOMContentLoaded', () => {
 darkModeToggle.addEventListener('change', function () {
     if (this.checked) {
         document.body.classList.add('dark-mode');
-        localStorageItem('darkMode', 'true');
+        localStorageItem('dark-mode', 'true');
     } else {
         document.body.classList.remove('dark-mode');
-        localStorageItem('darkMode', 'false');
+        localStorageItem('dark-mode', 'false');
     }
 });
 function localStorageItem(name, value, isGet=false) {
