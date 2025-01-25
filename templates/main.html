@@ -565,7 +565,7 @@ document.getElementById('cancel-restart').addEventListener('click', function() {
 
 const darkModeToggle = document.getElementById('darkModeToggle');
 document.addEventListener('DOMContentLoaded', () => {
-    if (localStorageItem('dark-mode', 'true', true)) {
+    if (localStorageItem('darkMode', 'true', true)) {
         document.body.classList.add('dark-mode');
         darkModeToggle.checked = true;
     }
@@ -573,10 +573,10 @@ document.addEventListener('DOMContentLoaded', () => {
 darkModeToggle.addEventListener('change', function () {
     if (this.checked) {
         document.body.classList.add('dark-mode');
-        localStorageItem('dark-mode', 'true');
+        localStorageItem('darkMode', 'true');
     } else {
         document.body.classList.remove('dark-mode');
-        localStorageItem('dark-mode', 'false');
+        localStorageItem('darkMode', 'false');
     }
 });
 function localStorageItem(name, value, isGet=false) {
@@ -587,7 +587,7 @@ function localStorageItem(name, value, isGet=false) {
             localStorage.setItem(name, value);
         }
     } catch (e) {
-        return;
+        return null;
     }
 }
 
