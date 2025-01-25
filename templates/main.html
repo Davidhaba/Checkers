@@ -565,7 +565,7 @@ document.getElementById('cancel-restart').addEventListener('click', function() {
 
 const darkModeToggle = document.getElementById('darkModeToggle');
 document.addEventListener('DOMContentLoaded', () => {
-    if (localStorageItem('darkMode', 'true', true)) {
+    if (localStorageItem('dark-mode', 'true', true)) {
         document.body.classList.add('dark-mode');
         darkModeToggle.checked = true;
     }
@@ -573,10 +573,10 @@ document.addEventListener('DOMContentLoaded', () => {
 darkModeToggle.addEventListener('change', function () {
     if (this.checked) {
         document.body.classList.add('dark-mode');
-        localStorageItem('darkMode', 'true');
+        localStorageItem('dark-mode', 'true');
     } else {
         document.body.classList.remove('dark-mode');
-        localStorageItem('darkMode', 'false');
+        localStorageItem('dark-mode', 'false');
     }
 });
 function localStorageItem(name, value, isGet=false) {
@@ -587,59 +587,9 @@ function localStorageItem(name, value, isGet=false) {
             localStorage.setItem(name, value);
         }
     } catch (e) {
-        return null;
+        return;
     }
 }
-
-const translationsCkeckers = {
-    uk: {
-        settingsTitle: "Налаштування гри",
-        language: "Мова:",
-        gameMode: "Режим гри:",
-        singlePlayer: "Один гравець (проти ШІ)",
-        twoPlayers: "Двоє гравців",
-        startingPlayer: "Починають:",
-        white: "Білі",
-        black: "Чорні",
-        darkMode: "Темний режим:",
-        startGame: "Почати гру",
-        statusText: "Статус",
-        scoreboard: "Табло результатів",
-        statusTextTurn: "Хід:",
-        statusTextFirstTurn: "Перший хід:",
-        whiteWin: "Перемогли Білі!",
-        blackWin: "Перемогли Чорні!",
-        draw: "Нічия!",
-        gameOverText: "Непогано!",
-        newGame: "Нова гра",
-        selectOptions: "Оберіть параметри...",
-        draw: "Нічия!",
-        theBlackPiecesWon: "Перемогли чорні фігури!",
-        theWhitePiecesWon: "Перемогли білі фігури!",
-        mandatoryCapture: "Обов'язковий бій:",
-        warningTextInRestartModal: "Ви впевнені, що хочете перезапустити гру?",
-        warningText: "Увага!",
-        yesRestart: "Так, перезапустити",
-        noKeepIt: "Ні, залишити",
-        undoMove: "Скасувати хід",
-        redoMove: "Повернути хід",
-    },
-    en: {
-        settingsTitle: "Game Settings",
-        language: "Language:",
-        gameMode: "Game Mode:",
-        singlePlayer: "Single Player (vs AI)",
-        twoPlayers: "Two Players",
-        startingPlayer: "Starting Player:",
-        white: "White",
-        black: "Black",
-        darkMode: "Dark Mode:",
-        startGame: "Start Game",
-        statusText: "Status",
-        scoreboard: "Score Board",
-        statusTextTurn: "Turn:",
-        statusTextFirstTurn: "First turn:",
-        whiteWin
 
 const translationsCkeckers = {
     uk: {
@@ -729,7 +679,7 @@ function updateLanguageTextsCheckers() {
     document.querySelector("#game-over-text").textContent = texts.gameOverText;
     document.querySelector("#restart-button").textContent = texts.newGame;
     document.querySelector("#restart-button-inMainScreen").textContent = texts.newGame;
-     document.querySelector("#mandatoryCaptureLabel").textContent = texts.mandatoryCapture;
+    document.querySelector("#mandatoryCaptureLabel").textContent = texts.mandatoryCapture;
     document.querySelector("#confirm-restart").textContent = texts.yesRestart;
     document.querySelector("#cancel-restart").textContent = texts.noKeepIt;
     document.querySelector("#warningTextInRestartModal").textContent = texts.warningTextInRestartModal;
