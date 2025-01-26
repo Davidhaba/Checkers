@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <title>Checkers</title>
+    <title>Checkers Battle || Game</title>
 </head>
 <body>
     <div id="game-info">
@@ -48,7 +48,7 @@
 
 <div id="settings-modal" class="modal hidden">
     <div class="modal-content">
-        <h2>Game Settings</h2>
+        <h2>Checkers Settings</h2>
         <form id="game-settings">
             <label for="language-selector">Language:</label>
             <select name="language" id="language-selector">
@@ -593,7 +593,7 @@ function localStorageItem(name, value, isGet=false) {
 
 const translationsCkeckers = {
     uk: {
-        settingsTitle: "Налаштування гри",
+        settingsTitle: "Налаштування Шашок",
         language: "Мова:",
         gameMode: "Режим гри:",
         singlePlayer: "Один гравець (проти ШІ)",
@@ -625,7 +625,7 @@ const translationsCkeckers = {
         redoMove: "Повернути хід",
     },
     en: {
-        settingsTitle: "Game Settings",
+        settingsTitle: "Checkers Settings",
         language: "Language:",
         gameMode: "Game Mode:",
         singlePlayer: "Single Player (vs AI)",
